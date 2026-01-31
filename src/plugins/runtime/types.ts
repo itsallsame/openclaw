@@ -148,6 +148,16 @@ type HandleWhatsAppAction =
 type CreateWhatsAppLoginTool =
   typeof import("../../channels/plugins/agent-tools/whatsapp-login.js").createWhatsAppLoginTool;
 
+// Lark channel types
+type ListLarkAccountIds = typeof import("../../lark/accounts.js").listLarkAccountIds;
+type ResolveLarkAccount = typeof import("../../lark/accounts.js").resolveLarkAccount;
+type ListEnabledLarkAccounts = typeof import("../../lark/accounts.js").listEnabledLarkAccounts;
+type ProbeLark = typeof import("../../lark/probe.js").probeLark;
+type SendMessageLark = typeof import("../../lark/send.js").sendMessageLark;
+type MonitorLarkProvider = typeof import("../../lark/monitor.js").monitorLarkProvider;
+type LarkMessageActions =
+  typeof import("../../channels/plugins/actions/lark.js").larkMessageActions;
+
 // LINE channel types
 type ListLineAccountIds = typeof import("../../line/accounts.js").listLineAccountIds;
 type ResolveDefaultLineAccountId =
@@ -346,6 +356,15 @@ export type PluginRuntime = {
       createQuickReplyItems: CreateQuickReplyItems;
       buildTemplateMessageFromPayload: BuildTemplateMessageFromPayload;
       monitorLineProvider: MonitorLineProvider;
+    };
+    lark: {
+      listLarkAccountIds: ListLarkAccountIds;
+      resolveLarkAccount: ResolveLarkAccount;
+      listEnabledLarkAccounts: ListEnabledLarkAccounts;
+      probeLark: ProbeLark;
+      sendMessageLark: SendMessageLark;
+      monitorLarkProvider: MonitorLarkProvider;
+      messageActions: LarkMessageActions;
     };
   };
   logging: {

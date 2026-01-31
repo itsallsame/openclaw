@@ -144,6 +144,15 @@ import {
 } from "../../line/send.js";
 import { monitorLineProvider } from "../../line/monitor.js";
 import { buildTemplateMessageFromPayload } from "../../line/template-messages.js";
+import {
+  listLarkAccountIds,
+  listEnabledLarkAccounts,
+  resolveLarkAccount,
+} from "../../lark/accounts.js";
+import { probeLark } from "../../lark/probe.js";
+import { sendMessageLark } from "../../lark/send.js";
+import { monitorLarkProvider } from "../../lark/monitor.js";
+import { larkMessageActions } from "../../channels/plugins/actions/lark.js";
 
 import type { PluginRuntime } from "./types.js";
 
@@ -334,6 +343,15 @@ export function createPluginRuntime(): PluginRuntime {
         createQuickReplyItems,
         buildTemplateMessageFromPayload,
         monitorLineProvider,
+      },
+      lark: {
+        listLarkAccountIds,
+        resolveLarkAccount,
+        listEnabledLarkAccounts,
+        probeLark,
+        sendMessageLark,
+        monitorLarkProvider,
+        messageActions: larkMessageActions,
       },
     },
     logging: {
