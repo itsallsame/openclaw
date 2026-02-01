@@ -1,0 +1,11 @@
+{
+  "name": "@openclaw/content-publisher",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "index.ts",
+  "description": "Content publishing extension for social media platforms",
+  "peerDependencies": {
+    "openclaw": "workspace:*"
+  }
+}

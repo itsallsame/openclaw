@@ -1,0 +1,26 @@
+{
+  "id": "content-publisher",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "defaultProfile": {
+        "type": "string",
+        "description": "Default browser profile to use"
+      },
+      "platforms": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "xiaohongshu": {
+            "type": "object",
+            "properties": {
+              "enabled": { "type": "boolean", "default": true },
+              "autoSubmit": { "type": "boolean", "default": false }
+            }
+          }
+        }
+      }
+    }
+  }
+}
