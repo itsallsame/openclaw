@@ -6,7 +6,7 @@ Publish content to social media platforms using OpenClaw's browser automation.
 
 | Platform | Status | Content Types |
 |----------|--------|---------------|
-| 小红书 (Xiaohongshu) | ✅ Ready | Image posts |
+| 小红书 (Xiaohongshu) | ✅ Ready | Image posts, Video posts |
 | 抖音 (Douyin) | 🚧 Planned | Video posts |
 | 微博 (Weibo) | 🚧 Planned | Text, Image |
 | Twitter/X | 🚧 Planned | Text, Image |
@@ -82,6 +82,9 @@ Agent: Post to Xiaohongshu with title "My Post", content "Hello world!", and ima
 - `images` (optional): Array of images
   - `type`: `url`, `path`, or `base64`
   - `value`: The URL, file path, or base64 data
+- `video` (optional): Video file for video posts
+  - `type`: `path` or `url`
+  - `value`: The file path or URL
 - `tags` (optional): Array of tags (without # prefix)
 - `autoSubmit` (optional): Auto-click publish button (default: false)
 - `draft` (optional): Save as draft instead
@@ -110,6 +113,18 @@ openclaw agent --message "Post to Xiaohongshu with title '分享', content '好�
 
 ```bash
 openclaw agent --message "Post to Xiaohongshu: title '美食分享', content '今天做的菜', image /tmp/food.jpg, tags: 美食, 烹饪, 家常菜"
+```
+
+### Publish Video
+
+```bash
+openclaw agent --message "Post video to Xiaohongshu: title '视频测试', content '这是视频内容', video /tmp/test-video.mp4"
+```
+
+### Publish Video with Tags
+
+```bash
+openclaw agent --message "Post video to Xiaohongshu: title '旅行Vlog', content '今天的旅行记录', video /tmp/travel.mp4, tags: 旅行, Vlog, 生活记录"
 ```
 
 ## Browser Setup
@@ -142,10 +157,21 @@ If you prefer using your existing Chrome with saved logins:
 
 ### 小红书 (Xiaohongshu)
 
+**Image Posts:**
 - **Images required**: At least 1 image is mandatory
+- **Max images**: 18 images per post
+- **Image formats**: JPEG, PNG, WebP
+- **Image size**: Maximum 20MB per image
+
+**Video Posts:**
+- **Video duration**: Maximum 60 minutes
+- **Video size**: Maximum 20GB
+- **Video formats**: MP4, MOV recommended
+- **Video resolution**: 720P (1280×720) or higher recommended
+
+**Common Limits:**
 - **Title limit**: Maximum 20 characters
 - **Content limit**: Maximum 1000 characters
-- **Max images**: 18 images per post
 - **Tags**: Will show suggestions, auto-selects first match
 
 **Publish URL**: https://creator.xiaohongshu.com/publish/publish

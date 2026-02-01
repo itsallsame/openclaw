@@ -288,6 +288,22 @@ export class BrowserContext {
   }
 
   /**
+   * Upload files to a specific input selector (Playwright setInputFiles)
+   */
+  async uploadToSelector(
+    paths: string[],
+    selector: string,
+    options?: { timeoutMs?: number }
+  ): Promise<void> {
+    await this.browserRequest("POST", "/hooks/file-chooser", {
+      targetId: this.currentTabId,
+      paths,
+      element: selector,
+      timeoutMs: options?.timeoutMs,
+    });
+  }
+
+  /**
    * Wait for a condition
    */
   async wait(condition: WaitCondition): Promise<void> {

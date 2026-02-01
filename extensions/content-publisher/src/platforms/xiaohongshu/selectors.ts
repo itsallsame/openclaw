@@ -22,14 +22,16 @@ export const XHS_SELECTORS = {
     // Image upload
     uploadInput: ".upload-input",
     uploadArea: ".upload-wrapper",
-    imagePreview: ".image-item",
+    imagePreview: ".img-preview-area .pr",
 
-    // Title input
+    // Title input - 实际使用的选择器
     titleInput: "div.d-input input",
+    titleInputClass: "d-input",
     titlePlaceholder: "填写标题",
 
-    // Content editor (Quill-based)
-    contentEditor: "div.ql-editor",
+    // Content editor - TipTap 编辑器（不是 Quill）
+    contentEditor: ".tiptap.ProseMirror",
+    contentEditorAlt: "div[contenteditable='true']",
     contentPlaceholder: "输入正文描述",
     textboxRole: '[role="textbox"]',
 
@@ -39,8 +41,8 @@ export const XHS_SELECTORS = {
     tagSuggestion: ".item",
 
     // Submit
-    publishButton: "发布",
-    draftButton: "存草稿",
+    publishButtons: ["发布", "发布笔记", "立即发布"],
+    draftButtons: ["暂存离开", "存草稿", "保存草稿", "草稿", "存为草稿"],
 
     // Status
     publishSuccess: "发布成功",
@@ -61,7 +63,7 @@ export const XHS_SELECTORS = {
 export const XHS_URLS = {
   home: "https://www.xiaohongshu.com",
   creator: "https://creator.xiaohongshu.com",
-  publish: "https://creator.xiaohongshu.com/publish/publish",
+  publish: "https://creator.xiaohongshu.com/publish/publish?source=official",
   login: "https://creator.xiaohongshu.com/login",
 };
 
