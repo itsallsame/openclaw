@@ -10,6 +10,11 @@ import time
 import secrets
 from dataclasses import dataclass
 from typing import Iterable, List, Optional, Tuple
+from pathlib import Path
+
+# 导入豆包ASR模块
+from doubao_asr import transcribe_with_doubao
+from srt_utils import doubao_to_srt, save_srt
 
 
 @dataclass
@@ -202,15 +207,53 @@ def build_prompt(segments: List[Segment], total_seconds: Optional[float], requir
 
 def extract_json(text: str) -> dict:
     text = text.strip()
+
+    # 尝试直接解析
     try:
         return json.loads(text)
     except json.JSONDecodeError:
         pass
+
+    # 移除 markdown 代码块标记
+    if text.startswith("```"):
+        lines = text.split("\n")
+        # 移除第一行（```json 或 ```）
+        if lines[0].startswith("```"):
+            lines = lines[1:]
+        # 移除最后一行（```）
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+        text = "\n".join(lines).strip()
+
+        # 再次尝试解析
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError:
+            pass
+
+    # 查找 JSON 对象
     start = text.find("{")
     end = text.rfind("}")
     if start == -1 or end == -1 or end <= start:
+        # 保存原始输出用于调试
+        debug_file = "/tmp/llm-debug-output.txt"
+        with open(debug_file, "w") as f:
+            f.write(f"Original text:\n{text}\n\n")
+            f.write(f"start={start}, end={end}\n")
+        eprint(f"LLM did not return JSON. Debug output saved to {debug_file}")
         raise ValueError("LLM did not return JSON.")
-    return json.loads(text[start : end + 1])
+
+    try:
+        return json.loads(text[start : end + 1])
+    except json.JSONDecodeError as e:
+        # 保存原始输出用于调试
+        debug_file = "/tmp/llm-debug-output.txt"
+        with open(debug_file, "w") as f:
+            f.write(f"Original text:\n{text}\n\n")
+            f.write(f"Extracted JSON:\n{text[start : end + 1]}\n\n")
+            f.write(f"Error: {e}\n")
+        eprint(f"JSON parse error. Debug output saved to {debug_file}")
+        raise
 
 
 def build_highlight_schema() -> dict:
@@ -589,28 +632,60 @@ def burn_subtitles(input_path: str, srt_path: str, output_path: str, crf: str, p
     )
 
 
-def run_whisper(input_path: str, output_dir: str, model: Optional[str], language: Optional[str], task: Optional[str]) -> str:
-    args = ["whisper", input_path, "--output_format", "srt", "--output_dir", output_dir]
-    if model:
-        args += ["--model", model]
-    if language:
-        args += ["--language", language]
-    if task:
-        args += ["--task", task]
-    run_cmd(args)
+def run_doubao_asr(
+    input_path: str,
+    output_dir: str,
+    app_id: str,
+    access_token: str,
+    language: Optional[str],
+) -> str:
+    """使用豆包ASR转录音频并保存为SRT"""
+    eprint(f"Calling Doubao ASR for {input_path}...")
+
+    # 转换音频为豆包ASR要求的格式：16kHz, mono, WAV PCM
+    audio_wav = os.path.join(output_dir, "audio_16k_mono.wav")
+    eprint(f"Converting audio to 16kHz mono WAV...")
+    run_cmd([
+        resolve_bin("ffmpeg"),
+        "-hide_banner",
+        "-loglevel", "error",
+        "-y",
+        "-i", input_path,
+        "-ar", "16000",
+        "-ac", "1",
+        "-acodec", "pcm_s16le",
+        audio_wav,
+    ])
+
+    # 调用豆包ASR
+    result = transcribe_with_doubao(
+        audio_path=Path(audio_wav),
+        app_id=app_id,
+        access_token=access_token,
+        language=language,
+    )
+
+    # 转换为SRT格式
+    srt_content = doubao_to_srt(result)
+
+    # 保存SRT文件
     base = os.path.basename(input_path)
     srt_path = os.path.join(output_dir, f"{os.path.splitext(base)[0]}.srt")
+    save_srt(srt_content, srt_path)
+
     if not os.path.isfile(srt_path):
-        raise FileNotFoundError(f"Whisper did not output {srt_path}")
+        raise FileNotFoundError(f"Doubao ASR did not output {srt_path}")
+
+    eprint(f"Transcription saved to {srt_path}")
     return srt_path
 
 
 def process_separate_mode(
     clips: List[str],
     output_base: str,
-    whisper_model: Optional[str],
-    whisper_language: Optional[str],
-    whisper_task: Optional[str],
+    doubao_app_id: str,
+    doubao_access_token: str,
+    doubao_language: Optional[str],
     subtitle_bilingual: str,
     llm_cmd: str,
     llm_model: Optional[str],
@@ -631,7 +706,13 @@ def process_separate_mode(
         output_file = f"{base_name}-{idx:02d}{ext}"
 
         # Transcribe this clip
-        clip_srt = run_whisper(clip, tmpdir, whisper_model, whisper_language, whisper_task)
+        clip_srt = run_doubao_asr(
+            clip,
+            tmpdir,
+            doubao_app_id,
+            doubao_access_token,
+            doubao_language,
+        )
 
         # Handle bilingual subtitles if needed
         if subtitle_bilingual:
@@ -665,17 +746,15 @@ def main() -> int:
     parser.add_argument("--resume", action="store_true", help="Reuse cached artifacts in --run-dir")
     parser.add_argument("--total-seconds", dest="total_seconds", help="Target highlight total duration (seconds, HH:MM:SS, or 'auto' for LLM to decide)")
     parser.add_argument(
-        "--requirements",
-        dest="requirements",
+        "--prompt",
+        dest="prompt",
         help="Content requirements (natural language, e.g. conclusion, data, emotion)",
     )
     parser.add_argument("--subtitles", dest="subtitles", help="Subtitle mode: auto or path to final SRT")
     parser.add_argument("--llm-cmd", dest="llm_cmd", default="", help="LLM command to run (e.g. codex exec)")
     parser.add_argument("--llm-model", dest="llm_model", default="", help="LLM model name")
     parser.add_argument("--llm-args", dest="llm_args", default="", help="Extra args passed to LLM command")
-    parser.add_argument("--whisper-model", dest="whisper_model", default="", help="Whisper model")
-    parser.add_argument("--whisper-language", dest="whisper_language", default="", help="Whisper language (omit for auto-detect)")
-    parser.add_argument("--whisper-task", dest="whisper_task", default="", help="Whisper task: transcribe|translate")
+    parser.add_argument("--doubao-language", dest="doubao_language", default="", help="Doubao language code (omit for auto-detect)")
     parser.add_argument(
         "--subtitle-bilingual",
         dest="subtitle_bilingual",
@@ -690,7 +769,7 @@ def main() -> int:
     )
     parser.add_argument("--crf", dest="crf", default="23", help="CRF for subtitle burn")
     parser.add_argument("--preset", dest="preset", default="medium", help="x264 preset for subtitle burn")
-    parser.add_argument("--output-mode", dest="output_mode", default="concat", choices=["concat", "separate"], help="Output mode: concat (single video) or separate (multiple videos)")
+    parser.add_argument("--output-mode", dest="output_mode", default="separate", choices=["concat", "separate"], help="Output mode: separate (multiple videos with subtitles) or concat (single merged video)")
     args = parser.parse_args()
 
     missing = []
@@ -698,8 +777,8 @@ def main() -> int:
         missing.append("--in")
     if not args.output_path:
         missing.append("--out")
-    if not args.requirements:
-        missing.append("--requirements")
+    if not args.prompt:
+        missing.append("--prompt")
     if not args.subtitles:
         missing.append("--subtitles")
     if missing:
@@ -713,11 +792,20 @@ def main() -> int:
         return 1
 
     if not args.llm_cmd:
-        args.llm_cmd = "claude"
+        args.llm_cmd = "codex exec"
 
-    # Normalize whisper language: treat "auto" as unset
-    if args.whisper_language and args.whisper_language.strip().lower() == "auto":
-        args.whisper_language = ""
+    # 获取豆包认证信息（仅从环境变量读取）
+    doubao_app_id = os.getenv("DOUBAO_APP_ID", "")
+    doubao_access_token = os.getenv("DOUBAO_ACCESS_TOKEN", "")
+
+    if not doubao_app_id or not doubao_access_token:
+        eprint("Error: Doubao credentials required. Set DOUBAO_APP_ID and DOUBAO_ACCESS_TOKEN environment variables")
+        return 2
+
+    # Normalize doubao language: treat "auto" as unset
+    doubao_language = args.doubao_language or None
+    if doubao_language and doubao_language.strip().lower() == "auto":
+        doubao_language = None
 
     # Parse total_seconds: support 'auto' or explicit duration
     total_seconds: Optional[float] = None
@@ -765,13 +853,13 @@ def main() -> int:
         if args.resume and os.path.isfile(transcript_srt):
             eprint(f"Reusing transcript: {transcript_srt}")
         else:
-            eprint("Transcribing original video...")
-            transcript_srt = run_whisper(
+            eprint("Transcribing original video with Doubao ASR...")
+            transcript_srt = run_doubao_asr(
                 input_path,
                 tmpdir,
-                args.whisper_model or None,
-                args.whisper_language or None,
-                args.whisper_task or None,
+                doubao_app_id,
+                doubao_access_token,
+                doubao_language,
             )
         segments = reindex_segments(parse_srt(transcript_srt))
         if not segments:
@@ -779,7 +867,7 @@ def main() -> int:
             return 1
 
         eprint("Selecting highlight segments...")
-        prompt = build_prompt(segments, total_seconds, args.requirements)
+        prompt = build_prompt(segments, total_seconds, args.prompt)
         llm_output_path = os.path.join(tmpdir, "llm-output.json")
         llm_output = read_json_file(llm_output_path) if args.resume else None
         if llm_output:
@@ -819,9 +907,9 @@ def main() -> int:
             output_files = process_separate_mode(
                 clips,
                 output_path,
-                args.whisper_model or None,
-                args.whisper_language or None,
-                args.whisper_task or None,
+                doubao_app_id,
+                doubao_access_token,
+                doubao_language,
                 subtitle_bilingual,
                 args.llm_cmd,
                 args.llm_model or None,
@@ -847,13 +935,13 @@ def main() -> int:
             if args.resume and os.path.isfile(final_srt):
                 eprint(f"Reusing final transcript: {final_srt}")
             else:
-                eprint("Transcribing concatenated video...")
-                final_srt = run_whisper(
+                eprint("Transcribing concatenated video with Doubao ASR...")
+                final_srt = run_doubao_asr(
                     concat_path,
                     tmpdir,
-                    args.whisper_model or None,
-                    args.whisper_language or None,
-                    args.whisper_task or None,
+                    doubao_app_id,
+                    doubao_access_token,
+                    doubao_language,
                 )
         else:
             final_srt = os.path.abspath(args.subtitles)
@@ -881,7 +969,15 @@ def main() -> int:
             final_srt = bilingual_srt
 
         eprint("Burning subtitles and exporting...")
-        burn_subtitles(concat_path, final_srt, output_path, args.crf, args.preset)
+        # 如果 concat_path 和 output_path 相同，先输出到临时文件
+        if os.path.abspath(concat_path) == os.path.abspath(output_path):
+            temp_output = os.path.join(tmpdir, "final_with_subs.mp4")
+            burn_subtitles(concat_path, final_srt, temp_output, args.crf, args.preset)
+            # 移动临时文件到最终位置
+            import shutil
+            shutil.move(temp_output, output_path)
+        else:
+            burn_subtitles(concat_path, final_srt, output_path, args.crf, args.preset)
 
         eprint("Done")
         print(output_path)
