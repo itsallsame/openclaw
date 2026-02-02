@@ -71,4 +71,5 @@ USER.md
 
 # local tooling
 .serena/
+.claude/
 skills/video-edit/scripts/__pycache__/
