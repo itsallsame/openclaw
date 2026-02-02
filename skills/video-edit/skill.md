@@ -1,5 +1,6 @@
 ---
 name: video-edit
+command: video-edit
 description: LLM-scored highlight editing with Doubao ASR + ffmpeg (subtitles burned-in).
 homepage: https://www.volcengine.com/docs/6561/1354869
 metadata: {"openclaw":{"emoji":"✂️","requires":{"bins":["ffmpeg"],"anyBins":["codex","gemini","claude","opencode","pi"]},"install":[{"id":"brew-ffmpeg","kind":"brew","formula":"ffmpeg","bins":["ffmpeg"],"label":"Install ffmpeg (brew)"}]}}
@@ -8,6 +9,15 @@ metadata: {"openclaw":{"emoji":"✂️","requires":{"bins":["ffmpeg"],"anyBins":
 # Video Edit (LLM highlight pipeline)
 
 This skill takes a local video, transcribes it, uses an LLM to select highlight ranges, trims/concats those ranges, and burns subtitles into the final output. Each run writes results into its own run directory.
+
+## IMPORTANT: Execution Instructions
+
+**YOU MUST ONLY execute the edit.sh script. DO NOT try to execute transcribe.sh, video_cut.py, or any other scripts directly. The edit.sh script handles the complete pipeline automatically.**
+
+**ALWAYS use this command pattern:**
+```bash
+{baseDir}/scripts/edit.sh [options]
+```
 
 ## Required info (ask if missing)
 

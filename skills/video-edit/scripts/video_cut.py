@@ -4,6 +4,7 @@ import json
 import os
 import re
 import shlex
+import shutil
 import subprocess
 import sys
 import time
@@ -540,7 +541,7 @@ def clip_segments(input_path: str, ranges: List[dict], workdir: str) -> List[str
         start = max(0.0, item["start"])
         end = max(start + 0.1, item["end"])
         duration = max(0.1, end - start)
-        clip_path = os.path.join(workdir, f"clip-{idx:02d}.mp4")
+        clip_path = os.path.join(workdir, f"segment-{idx:02d}.mp4")
         run_cmd(
             [
                 resolve_bin("ffmpeg"),
@@ -735,6 +736,11 @@ def process_separate_mode(
         output_files.append(output_file)
         eprint(f"  Created: {output_file}")
 
+        # Copy subtitle file to output directory
+        output_srt = os.path.splitext(output_file)[0] + ".srt"
+        shutil.copy2(clip_srt, output_srt)
+        eprint(f"  Subtitle: {output_srt}")
+
     return output_files
 
 
@@ -832,7 +838,7 @@ def main() -> int:
         eprint("--resume requires --run-dir")
         return 2
 
-    output_name = "highlights.mp4" if output_is_dir else os.path.basename(output_path)
+    output_name = "clip.mp4" if output_is_dir else os.path.basename(output_path)
     if args.run_dir:
         run_dir = os.path.abspath(args.run_dir)
         os.makedirs(run_dir, exist_ok=True)
