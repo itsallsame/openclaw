@@ -6,14 +6,11 @@
 # ]
 # ///
 """
-Generate or edit images via laozhang.ai (Nano Banana Pro - Google native format).
+Generate images via Doubao (豆包) Seedream API.
 
 Usage:
   uv run generate_image.py --prompt "your image description" --filename "output.png"
-  uv run generate_image.py --prompt "your image description" --filename "output.png" --aspect-ratio "3:4" --image-size "2K"
-
-Edit/compose (image inputs):
-  uv run generate_image.py --prompt "combine these" --filename "output.png" -i img1.png -i img2.png
+  uv run generate_image.py --prompt "your image description" --filename "output.png" --size "2K"
 """
 
 import argparse
@@ -27,8 +24,8 @@ from typing import List, Optional, Tuple
 
 import requests
 
-DEFAULT_BASE_URL = "https://api.laozhang.ai"
-DEFAULT_MODEL = "gemini-3-pro-image-preview"
+DEFAULT_BASE_URL = "https://ark.cn-beijing.volces.com"
+DEFAULT_MODEL = "doubao-seedream-4-0-250828"
 
 
 def eprint(*args: str) -> None:
@@ -87,7 +84,7 @@ def build_output_paths(base_path: Path, count: int, mime: str) -> List[Path]:
 
 
 def get_api_key(provided: Optional[str]) -> Optional[str]:
-    return provided or os.environ.get("LAOZHANG_API_KEY") or os.environ.get("OPENROUTER_API_KEY")
+    return provided or os.environ.get("ARK_API_KEY") or os.environ.get("DOUBAO_API_KEY")
 
 
 def get_header(value: Optional[str], env_key: str) -> Optional[str]:
@@ -97,93 +94,68 @@ def get_header(value: Optional[str], env_key: str) -> Optional[str]:
 def build_payload(
     prompt: str,
     input_images: List[Path],
-    aspect_ratio: Optional[str],
-    image_size: Optional[str],
+    size: Optional[str],
+    watermark: bool,
 ) -> dict:
-    """Build Google native format payload."""
-    parts = [{"text": prompt}]
-
-    # Add input images if any
-    for img_path in input_images:
-        mime, b64_data = load_image_base64(img_path)
-        parts.append({
-            "inline_data": {
-                "mime_type": mime,
-                "data": b64_data
-            }
-        })
-
+    """Build Doubao API payload."""
     payload = {
-        "contents": [{"parts": parts}],
-        "generationConfig": {
-            "responseModalities": ["IMAGE"]
-        }
+        "model": DEFAULT_MODEL,
+        "prompt": prompt,
+        "sequential_image_generation": "disabled",
+        "response_format": "url",
+        "stream": False,
+        "watermark": watermark,
     }
 
-    # Add image config if specified
-    image_config = {}
-    if aspect_ratio:
-        image_config["aspectRatio"] = aspect_ratio
-    if image_size:
-        image_config["imageSize"] = image_size
+    if size:
+        payload["size"] = size
 
-    if image_config:
-        payload["generationConfig"]["imageConfig"] = image_config
+    # Note: Doubao API doesn't support input images for editing
+    # If input_images provided, we ignore them
+    if input_images:
+        eprint("Warning: Doubao API doesn't support input images, ignoring them")
 
     return payload
 
 
-def parse_response(data: dict) -> List[Tuple[str, bytes]]:
-    """Parse Google native format response and return list of (mime, bytes)."""
-    saved_paths = []
+def parse_response(data: dict) -> List[str]:
+    """Parse Doubao API response and return list of image URLs."""
+    image_urls = []
 
-    candidates = data.get("candidates", [])
-    if not candidates:
-        return saved_paths
+    # Doubao API returns: {"data": [{"url": "..."}, ...]}
+    data_list = data.get("data", [])
+    for item in data_list:
+        url = item.get("url")
+        if url:
+            image_urls.append(url)
 
-    content = candidates[0].get("content", {})
-    parts = content.get("parts", [])
-
-    for part in parts:
-        inline_data = part.get("inlineData")
-        if not inline_data:
-            continue
-
-        mime = inline_data.get("mimeType", "image/png")
-        b64_data = inline_data.get("data", "")
-
-        if b64_data:
-            payload_bytes = base64.b64decode(b64_data)
-            saved_paths.append((mime, payload_bytes))
-
-    return saved_paths
+    return image_urls
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Generate or edit images via laozhang.ai (Nano Banana Pro - Google native format)."
+        description="Generate images via Doubao (豆包) Seedream API."
     )
     parser.add_argument("--prompt", "-p", required=True, help="Image prompt")
     parser.add_argument("--filename", "-f", required=True, help="Output filename")
     parser.add_argument("--model", default=DEFAULT_MODEL, help=f"Model id (default: {DEFAULT_MODEL})")
-    parser.add_argument("--input-image", "-i", action="append", dest="input_images", help="Input image path(s)")
+    parser.add_argument("--input-image", "-i", action="append", dest="input_images", help="Input image path(s) (not supported by Doubao)")
     parser.add_argument(
         "--api-key",
         "-k",
-        help="API key (overrides LAOZHANG_API_KEY / OPENROUTER_API_KEY)",
+        help="API key (overrides ARK_API_KEY / DOUBAO_API_KEY)",
     )
     parser.add_argument("--base-url", default=DEFAULT_BASE_URL, help="Base URL")
-    parser.add_argument("--app-url", help="Optional HTTP-Referer header")
-    parser.add_argument("--app-title", help="Optional X-Title header")
-    parser.add_argument("--aspect-ratio", help="Aspect ratio (e.g. 1:1, 16:9, 3:4, 9:16)")
-    parser.add_argument("--image-size", help="Image size (e.g. 1K, 2K, 4K)")
+    parser.add_argument("--size", default="2K", help="Image size (1K, 2K, 4K, default: 2K)")
+    parser.add_argument("--watermark", action="store_true", default=False, help="Add watermark")
+    parser.add_argument("--no-watermark", action="store_false", dest="watermark", help="Disable watermark (default)")
 
     args = parser.parse_args()
 
     api_key = get_api_key(args.api_key)
     if not api_key:
         eprint("Error: No API key provided.")
-        eprint("Provide --api-key or set LAOZHANG_API_KEY / OPENROUTER_API_KEY.")
+        eprint("Provide --api-key or set ARK_API_KEY / DOUBAO_API_KEY.")
         return 1
 
     # Load input images
@@ -200,19 +172,14 @@ def main() -> int:
     payload = build_payload(
         args.prompt,
         input_image_paths,
-        args.aspect_ratio,
-        args.image_size,
+        args.size,
+        args.watermark,
     )
 
-    # Log payload (without base64 image data)
-    log_payload = json.loads(json.dumps(payload))
-    for content in log_payload.get("contents", []):
-        for part in content.get("parts", []):
-            if "inline_data" in part:
-                part["inline_data"]["data"] = f"<base64 data: {len(part['inline_data']['data'])} chars>"
+    # Log payload
     eprint("=" * 60)
     eprint("Request payload:")
-    eprint(json.dumps(log_payload, indent=2, ensure_ascii=False))
+    eprint(json.dumps(payload, indent=2, ensure_ascii=False))
     eprint("=" * 60)
 
     # Build headers
@@ -220,15 +187,9 @@ def main() -> int:
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
     }
-    app_url = get_header(args.app_url, "LAOZHANG_APP_URL") or get_header(args.app_url, "OPENROUTER_APP_URL")
-    app_title = get_header(args.app_title, "LAOZHANG_APP_TITLE") or get_header(args.app_title, "OPENROUTER_APP_TITLE")
-    if app_url:
-        headers["HTTP-Referer"] = app_url
-    if app_title:
-        headers["X-Title"] = app_title
 
     # Send request
-    url = args.base_url.rstrip("/") + f"/v1beta/models/{args.model}:generateContent"
+    url = args.base_url.rstrip("/") + "/api/v3/images/generations"
     eprint(f"Request URL: {url}")
     eprint("Sending request...")
 
@@ -242,38 +203,46 @@ def main() -> int:
 
     # Parse response
     data = response.json()
-    saved_paths = parse_response(data)
+    image_urls = parse_response(data)
 
-    if not saved_paths:
+    if not image_urls:
         eprint("No images returned from API.")
         return 1
 
-    # Save images with timestamp
+    # Download and save images with timestamp
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     output_base = Path(args.filename)
 
     # Add timestamp to filename
     stem = output_base.stem
-    suffix = output_base.suffix
+    suffix = output_base.suffix or ".png"
     timestamped_name = f"{stem}_{timestamp}{suffix}"
 
     # Use ~/Downloads/ as output directory
     downloads_dir = Path.home() / "Downloads"
     downloads_dir.mkdir(parents=True, exist_ok=True)
-    output_base = downloads_dir / timestamped_name
 
-    output_paths = build_output_paths(output_base, len(saved_paths), saved_paths[0][0])
+    for idx, url in enumerate(image_urls):
+        # Download image from URL
+        eprint(f"Downloading image {idx + 1}/{len(image_urls)} from {url}")
+        img_response = requests.get(url, timeout=60)
 
-    for (mime, payload_bytes), out_path in zip(saved_paths, output_paths):
-        if not out_path.suffix:
-            ext = mime_to_ext(mime)
-            if ext:
-                out_path = out_path.with_suffix(f".{ext}")
-        out_path.write_bytes(payload_bytes)
+        if img_response.status_code != 200:
+            eprint(f"Failed to download image: {img_response.status_code}")
+            continue
+
+        # Determine output path
+        if len(image_urls) > 1:
+            out_name = f"{stem}_{timestamp}_{idx + 1}{suffix}"
+        else:
+            out_name = timestamped_name
+
+        out_path = downloads_dir / out_name
+        out_path.write_bytes(img_response.content)
+
         full_path = out_path.resolve()
         print(f"Image saved: {full_path}")
         print(f"MEDIA: {full_path}")
-        # Output the actual file path for subsequent steps to use
         print(f"OUTPUT_FILE: {full_path}")
 
     return 0
