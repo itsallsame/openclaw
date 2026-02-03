@@ -1,335 +1,178 @@
-# 探索式迭代思考（Deep Iterative Thinking）
-
-当用户要求"探索式迭代思考"、"深度迭代"、"非线性迭代思考"时，你必须按照以下流程严格执行。
-
----
-
-## 第零步：理解问题（MANDATORY - 必须执行）
-
-在开始任何思考之前，你必须：
-
-### 1. 理解问题本身
-- 用户问的到底是什么？
-- 问题的真实意图是什么？
-- 有哪些隐含的假设？
-
-### 2. 理解问题的环境
-- 这个问题在什么上下文中？
-- 涉及哪些已有的设计和决策？
-- 与哪些其他部分相关？
-- 其他对象/问题的相互作用
-
-### 3. 理解问题的更高维度
-- 这个问题背后的本质问题是什么？
-- 是否有更抽象的视角？
-- 是否有更简单的问题陈述？
-
-
-**如果对问题理解不清晰，必须先使用AskUserQuestion工具澄清，然后再继续。**
-
----
-
-## 第一步：建立探索性TODO（MANDATORY）
-
-使用`TodoWrite`工具建立TODO list，必须包含：
-
-### 最小要求：至少5个TODO项
-
-### TODO类型分布：
-1. **困惑类**（至少1个）：记录当前的困惑点
-   - 示例："困惑：XX到底是什么意思？"
-
-2. **探索类**（至少2个）：从不同角度探索
-   - 示例："探索A：从YY角度理解"
-   - 示例："探索B：从ZZ角度对比"
-
-3. **验证类**（至少1个）：用反例或案例验证
-   - 示例："反例验证：如果不XX会怎样？"
-   - 示例："案例验证：用具体场景测试"
-
-4. **动态类**（可选）：根据探索发现动态添加
-
-5. **项目背景类**: (如果之前没有阅读docs目录的设计文档则先阅读然后充分理解当前项目的设计原则和框架
-
-### 禁止的TODO模式：
-- ❌ 线性步骤："第一步...第二步...第三步..."
-- ❌ 预设答案："验证XX方案的可行性"（已经假设了XX）
-- ❌ 纯技术执行："实现XX功能"
-
-### 正确的TODO示例：
-```
-- 困惑：用户问的"维度"到底指什么？
-- 探索A：从用户系统的4层设计理解
-- 探索B：从用户系统的7维State理解
-- 反例验证：如果不分层/分维会怎样？
-- 深入追问：为什么用户系统需要这样设计？
-```
-
----
-
-## 第二步：执行真实迭代（MANDATORY）
-
-### 核心原则：真实思考，而非表演思考
-
-### 执行规则：
-
-#### 1. 逐个TODO执行
-- 开始一个TODO时，立即用`TodoWrite`标记为`in_progress`
-- 完成一个TODO时，立即用`TodoWrite`标记为`completed`
-- **禁止**一次完成多个TODO后再批量更新
-
-#### 2. 展示真实思考过程
-```markdown
-## 探索A：从XX角度
-
-尝试1：...
-发现问题：...
-尝试2：...
-新的困惑：...
-
-等等，这个理解是错的！
-因为...
-需要重新思考...
-```
-
-#### 3. 允许并鼓励推翻
-- 发现理解错误时，立即承认并推翻
-- 不要为错误的方向辩护
-- 添加新TODO记录需要重新探索的方向
-
-#### 4. 持续追问本质（融合讨论原则）
-- 不要停留在表面
-- 每个发现都追问"为什么"
-- 寻找更抽象、更本质的理解
-- 用具体案例验证抽象理解
-
-#### 5. 多角度验证
-- **典型案例**：用正常情况验证
-- **反例**：用极端情况验证
-- **异常示例**：用边界情况验证
-- 验证思考是否完备
-
-#### 6. 动态调整TODO
-- 发现新问题 → 立即添加新TODO
-- 发现TODO无意义 → 删除并解释原因
-- 发现需要后退 → 修改TODO状态
-
-### 最小迭代轮次：3轮
-
-即使问题看似简单，也必须至少进行3轮探索：
-1. 第一轮：初步理解
-2. 第二轮：深化/挑战第一轮的理解
-3. 第三轮：综合验证
-
----
-
-## 第三步：案例验证（MANDATORY）
-
-得出初步结论后，必须用完整的案例场景验证：
-
-### 验证要求：
-1. **构造完整场景**：不是简单举例，而是完整的使用场景
-2. **模拟实际使用**：假设Ash在实际使用中会怎样
-3. **检查是否有效**：能否支撑实际需求
-4. **寻找漏洞**：尝试找出方案的问题
-
-### 如果验证失败：
-- 不要修补，要回退重新思考
-- 添加新TODO记录问题
-- 可能需要推翻整个方向
-
----
-
-## 第四步：总结和记录（MANDATORY）
-
-### 总结必须包含：
-
-1. **最终结论**
-   - 清晰陈述结论
-   - 标注完成度（如果未完成100%）
-
-2. **关键洞察**
-   - 最重要的发现是什么
-   - 哪些理解是关键的
-
-3. **被推翻的假设**
-   - 哪些想法被证明是错的
-   - 为什么错了
-   - 这对未来有什么启示
-
-4. **迭代关键转折点**
-   - 哪些时刻发生了重要转变
-   - 为什么会转变
-
-5. **待解决的问题**
-   - 还有哪些问题没解决
-   - 下一步应该做什么
-
----
-
-## 融合的讨论原则
-
-### 从CLAUDE.md的核心原则：
-
-#### 1. 思考的维度
-- ✅ 总是思考上下文和更高维度
-- ✅ 深度思考，不浮于表面
-- ✅ 从抽象本质和具体案例两个角度试探
-- ✅ 寻找common反例验证完备性
-- ✅ 关注本质问题，而非技术细节
-
-#### 2. 避免过早收敛
-- ✅ 不急于给出解决方案
-- ✅ 充分思考、理解、讨论
-- ✅ 不要成为第一个方案的奴隶
-
-#### 3. 设计哲学
-- ✅ 让LLM做它擅长的事
-- ✅ 不过度结构化
-- ✅ 简单结构、复杂处理
-
----
-
-## 必须使用的工具
-
-### TodoWrite（必须）
-- 建立TODO list
-- 实时更新状态
-- 动态添加/删除TODO
-
-### AskUserQuestion（当需要时）
-- 问题理解不清时
-- 发现多个可行方向需要选择时
-- 遇到关键决策点需要确认时
-
----
-
-## 检查清单
-
-在每个阶段结束时，问自己：
-
-### 理解问题阶段：
-- [ ] 我真的理解用户问的是什么吗？
-- [ ] 我理解问题的环境和上下文了吗？
-- [ ] 我找到更本质的问题陈述了吗？
-
-### 执行迭代阶段：
-- [ ] 我在真实思考还是在表演？
-- [ ] 我允许自己困惑了吗？
-- [ ] 我敢推翻自己的想法吗？
-- [ ] 我至少做了3轮迭代吗？
-- [ ] 我用了典型案例、反例、异常示例验证吗？
-
-### 验证阶段：
-- [ ] 我用完整场景验证了吗？
-- [ ] 验证真的有效还是只是自我安慰？
-- [ ] 我尝试找漏洞了吗？
-
-### 总结阶段：
-- [ ] 我记录了被推翻的假设吗？
-- [ ] 我承认未完成的部分了吗？
-- [ ] 我明确了下一步方向吗？
-
----
-
-## 常见错误警示
-
-### 错误1：假装迭代
-**表现**：写"第一轮...第二轮...第三轮..."，但实际是一次性写完的
-**识别**：所有轮次都是线性推进，没有真正的后退和推翻
-**后果**：思考质量低，结论不可靠
-
-### 错误2：过早收敛
-**表现**：快速给出"完美"框架，看起来很专业
-**识别**：没有困惑、没有矛盾、太过"合理"
-**后果**：可能错过真正的本质，设计出监控系统而非生命
-
-### 错误3：忽略环境
-**表现**：孤立地思考问题，不考虑上下文
-**识别**：没有提及相关的已有设计、没有对比其他模块
-**后果**：设计不协调，违背整体架构
-
-### 错误4：停留在表面
-**表现**：只回答"是什么"，不追问"为什么"
-**识别**：没有深入本质，缺少抽象理解
-**后果**：理解不深刻，无法指导设计
-
----
-
-## 成功案例参考
-
-### 案例：内容维度设计
-
-**问题**：参考用户维度，内容维度该怎么设计？
-
-**执行过程**：
-1. ✅ 理解问题：先搞清楚"维度"是什么意思
-2. ✅ 建立TODO：困惑、多角度探索、反例验证
-3. ✅ 真实迭代：
-   - 探索用户4层 → 发现不能照搬
-   - 尝试统一结构 → 发现过度结构化
-   - 反思"简单结构"原则 → 找到2层+描述的平衡
-4. ✅ 多次推翻：至少3次重大方向调整
-5. ✅ 案例验证：用"字节裁员"完整验证
-6. ✅ 诚实总结：承认只完成50%
-
-**结果**：得到可靠的设计方案，明确了待解决问题
-
----
-
-## 何时使用此模式
-
-### 应该使用：
-- 复杂的设计问题（没有明确答案）
-- 需要深度理解本质的问题
-- 涉及多个维度和权衡的决策
-- 系统架构设计
-
-### 不应使用：
-- 简单的实现问题（已有明确方案）
-- 纯信息查询（不需要设计决策）
-- 紧急问题修复（需要快速解决）
-
----
-
-## 触发关键词
-
-当用户说出以下词语时，自动启用此模式：
-- "探索式迭代思考"
-- "深度迭代"
-- "非线性迭代"
-- "深入思考这个问题"
-- "不要急于给结论"
-- "多角度迭代"
-
----
-
-**核心理念**：理解问题 → 真实探索 → 深入本质 → 诚实总结
-
-**最高原则**：真实的思考，而非表演的迭代。
-
-**本项目核心原则**:
-1. 重新构建镜像没有成本
-2. 宿主机和镜像之间不要挂载代码，修改了代码就COPY，然后重新构建镜像
-3. 不要再做测试了，修改完代码，能通过编译即可
-
-## 命令执行原则
-
-执行任何可能需要用户确认的命令时，自动添加相应的自动确认参数：
-
-- **包管理器**：
-  - `apt-get` → 使用 `apt-get -y`
-  - `yum` → 使用 `yum -y`
-  - `brew` → 大多数命令无需确认
-  - `npm/pnpm` → 使用 `--yes` 或 `-y`
-
-- **删除操作**：
-  - `rm` → 使用 `rm -f`（强制删除，不询问）
-  - `docker rm` → 使用 `docker rm -f`
-
-- **其他常见命令**：
-  - `cp` 覆盖时 → 使用 `cp -f`
-  - `mv` 覆盖时 → 使用 `mv -f`
-  - `git` 相关命令 → 根据具体情况添加 `--force` 参数（谨慎使用）
-
-**注意**：对于可能造成严重后果的操作（如 `rm -rf /` 或 `git push --force main`），仍然应该向用户确认。
+# Repository Guidelines
+
+- Repo: https://github.com/openclaw/openclaw
+- GitHub issues/comments/PR comments: use literal multiline strings or `-F - <<'EOF'` (or $'...') for real newlines; never embed "\\n".
+
+## Project Structure & Module Organization
+
+- Source code: `src/` (CLI wiring in `src/cli`, commands in `src/commands`, web provider in `src/provider-web.ts`, infra in `src/infra`, media pipeline in `src/media`).
+- Tests: colocated `*.test.ts`.
+- Docs: `docs/` (images, queue, Pi config). Built output lives in `dist/`.
+- Plugins/extensions: live under `extensions/*` (workspace packages). Keep plugin-only deps in the extension `package.json`; do not add them to the root `package.json` unless core uses them.
+- Plugins: install runs `npm install --omit=dev` in plugin dir; runtime deps must live in `dependencies`. Avoid `workspace:*` in `dependencies` (npm install breaks); put `openclaw` in `devDependencies` or `peerDependencies` instead (runtime resolves `openclaw/plugin-sdk` via jiti alias).
+- Installers served from `https://openclaw.ai/*`: live in the sibling repo `../openclaw.ai` (`public/install.sh`, `public/install-cli.sh`, `public/install.ps1`).
+- Messaging channels: always consider **all** built-in + extension channels when refactoring shared logic (routing, allowlists, pairing, command gating, onboarding, docs).
+  - Core channel docs: `docs/channels/`
+  - Core channel code: `src/telegram`, `src/discord`, `src/slack`, `src/signal`, `src/imessage`, `src/web` (WhatsApp web), `src/channels`, `src/routing`
+  - Extensions (channel plugins): `extensions/*` (e.g. `extensions/msteams`, `extensions/matrix`, `extensions/zalo`, `extensions/zalouser`, `extensions/voice-call`)
+- When adding channels/extensions/apps/docs, review `.github/labeler.yml` for label coverage.
+
+## Docs Linking (Mintlify)
+
+- Docs are hosted on Mintlify (docs.openclaw.ai).
+- Internal doc links in `docs/**/*.md`: root-relative, no `.md`/`.mdx` (example: `[Config](/configuration)`).
+- Section cross-references: use anchors on root-relative paths (example: `[Hooks](/configuration#hooks)`).
+- Doc headings and anchors: avoid em dashes and apostrophes in headings because they break Mintlify anchor links.
+- When Peter asks for links, reply with full `https://docs.openclaw.ai/...` URLs (not root-relative).
+- When you touch docs, end the reply with the `https://docs.openclaw.ai/...` URLs you referenced.
+- README (GitHub): keep absolute docs URLs (`https://docs.openclaw.ai/...`) so links work on GitHub.
+- Docs content must be generic: no personal device names/hostnames/paths; use placeholders like `user@gateway-host` and “gateway host”.
+
+## exe.dev VM ops (general)
+
+- Access: stable path is `ssh exe.dev` then `ssh vm-name` (assume SSH key already set).
+- SSH flaky: use exe.dev web terminal or Shelley (web agent); keep a tmux session for long ops.
+- Update: `sudo npm i -g openclaw@latest` (global install needs root on `/usr/lib/node_modules`).
+- Config: use `openclaw config set ...`; ensure `gateway.mode=local` is set.
+- Discord: store raw token only (no `DISCORD_BOT_TOKEN=` prefix).
+- Restart: stop old gateway and run:
+  `pkill -9 -f openclaw-gateway || true; nohup openclaw gateway run --bind loopback --port 18789 --force > /tmp/openclaw-gateway.log 2>&1 &`
+- Verify: `openclaw channels status --probe`, `ss -ltnp | rg 18789`, `tail -n 120 /tmp/openclaw-gateway.log`.
+
+## Build, Test, and Development Commands
+
+- Runtime baseline: Node **22+** (keep Node + Bun paths working).
+- Install deps: `pnpm install`
+- Pre-commit hooks: `prek install` (runs same checks as CI)
+- Also supported: `bun install` (keep `pnpm-lock.yaml` + Bun patching in sync when touching deps/patches).
+- Prefer Bun for TypeScript execution (scripts, dev, tests): `bun <file.ts>` / `bunx <tool>`.
+- Run CLI in dev: `pnpm openclaw ...` (bun) or `pnpm dev`.
+- Node remains supported for running built output (`dist/*`) and production installs.
+- Mac packaging (dev): `scripts/package-mac-app.sh` defaults to current arch. Release checklist: `docs/platforms/mac/release.md`.
+- Type-check/build: `pnpm build`
+- Lint/format: `pnpm check`
+- Tests: `pnpm test` (vitest); coverage: `pnpm test:coverage`
+
+## Coding Style & Naming Conventions
+
+- Language: TypeScript (ESM). Prefer strict typing; avoid `any`.
+- Formatting/linting via Oxlint and Oxfmt; run `pnpm check` before commits.
+- Add brief code comments for tricky or non-obvious logic.
+- Keep files concise; extract helpers instead of “V2” copies. Use existing patterns for CLI options and dependency injection via `createDefaultDeps`.
+- Aim to keep files under ~700 LOC; guideline only (not a hard guardrail). Split/refactor when it improves clarity or testability.
+- Naming: use **OpenClaw** for product/app/docs headings; use `openclaw` for CLI command, package/binary, paths, and config keys.
+
+## Release Channels (Naming)
+
+- stable: tagged releases only (e.g. `vYYYY.M.D`), npm dist-tag `latest`.
+- beta: prerelease tags `vYYYY.M.D-beta.N`, npm dist-tag `beta` (may ship without macOS app).
+- dev: moving head on `main` (no tag; git checkout main).
+
+## Testing Guidelines
+
+- Framework: Vitest with V8 coverage thresholds (70% lines/branches/functions/statements).
+- Naming: match source names with `*.test.ts`; e2e in `*.e2e.test.ts`.
+- Run `pnpm test` (or `pnpm test:coverage`) before pushing when you touch logic.
+- Do not set test workers above 16; tried already.
+- Live tests (real keys): `CLAWDBOT_LIVE_TEST=1 pnpm test:live` (OpenClaw-only) or `LIVE=1 pnpm test:live` (includes provider live tests). Docker: `pnpm test:docker:live-models`, `pnpm test:docker:live-gateway`. Onboarding Docker E2E: `pnpm test:docker:onboard`.
+- Full kit + what’s covered: `docs/testing.md`.
+- Pure test additions/fixes generally do **not** need a changelog entry unless they alter user-facing behavior or the user asks for one.
+- Mobile: before using a simulator, check for connected real devices (iOS + Android) and prefer them when available.
+
+## Commit & Pull Request Guidelines
+
+- Create commits with `scripts/committer "<msg>" <file...>`; avoid manual `git add`/`git commit` so staging stays scoped.
+- Follow concise, action-oriented commit messages (e.g., `CLI: add verbose flag to send`).
+- Group related changes; avoid bundling unrelated refactors.
+- Changelog workflow: keep latest released version at top (no `Unreleased`); after publishing, bump version and start a new top section.
+- PRs should summarize scope, note testing performed, and mention any user-facing changes or new flags.
+- PR review flow: when given a PR link, review via `gh pr view`/`gh pr diff` and do **not** change branches.
+- PR review calls: prefer a single `gh pr view --json ...` to batch metadata/comments; run `gh pr diff` only when needed.
+- Before starting a review when a GH Issue/PR is pasted: run `git pull`; if there are local changes or unpushed commits, stop and alert the user before reviewing.
+- Goal: merge PRs. Prefer **rebase** when commits are clean; **squash** when history is messy.
+- PR merge flow: create a temp branch from `main`, merge the PR branch into it (prefer squash unless commit history is important; use rebase/merge when it is). Always try to merge the PR unless it’s truly difficult, then use another approach. If we squash, add the PR author as a co-contributor. Apply fixes, add changelog entry (include PR # + thanks), run full gate before the final commit, commit, merge back to `main`, delete the temp branch, and end on `main`.
+- If you review a PR and later do work on it, land via merge/squash (no direct-main commits) and always add the PR author as a co-contributor.
+- When working on a PR: add a changelog entry with the PR number and thank the contributor.
+- When working on an issue: reference the issue in the changelog entry.
+- When merging a PR: leave a PR comment that explains exactly what we did and include the SHA hashes.
+- When merging a PR from a new contributor: add their avatar to the README “Thanks to all clawtributors” thumbnail list.
+- After merging a PR: run `bun scripts/update-clawtributors.ts` if the contributor is missing, then commit the regenerated README.
+
+## Shorthand Commands
+
+- `sync`: if working tree is dirty, commit all changes (pick a sensible Conventional Commit message), then `git pull --rebase`; if rebase conflicts and cannot resolve, stop; otherwise `git push`.
+
+### PR Workflow (Review vs Land)
+
+- **Review mode (PR link only):** read `gh pr view/diff`; **do not** switch branches; **do not** change code.
+- **Landing mode:** create an integration branch from `main`, bring in PR commits (**prefer rebase** for linear history; **merge allowed** when complexity/conflicts make it safer), apply fixes, add changelog (+ thanks + PR #), run full gate **locally before committing** (`pnpm build && pnpm check && pnpm test`), commit, merge back to `main`, then `git switch main` (never stay on a topic branch after landing). Important: contributor needs to be in git graph after this!
+
+## Security & Configuration Tips
+
+- Web provider stores creds at `~/.openclaw/credentials/`; rerun `openclaw login` if logged out.
+- Pi sessions live under `~/.openclaw/sessions/` by default; the base directory is not configurable.
+- Environment variables: see `~/.profile`.
+- Never commit or publish real phone numbers, videos, or live configuration values. Use obviously fake placeholders in docs, tests, and examples.
+- Release flow: always read `docs/reference/RELEASING.md` and `docs/platforms/mac/release.md` before any release work; do not ask routine questions once those docs answer them.
+
+## Troubleshooting
+
+- Rebrand/migration issues or legacy config/service warnings: run `openclaw doctor` (see `docs/gateway/doctor.md`).
+
+## Agent-Specific Notes
+
+- Vocabulary: "makeup" = "mac app".
+- Never edit `node_modules` (global/Homebrew/npm/git installs too). Updates overwrite. Skill notes go in `tools.md` or `AGENTS.md`.
+- Signal: "update fly" => `fly ssh console -a flawd-bot -C "bash -lc 'cd /data/clawd/openclaw && git pull --rebase origin main'"` then `fly machines restart e825232f34d058 -a flawd-bot`.
+- When working on a GitHub Issue or PR, print the full URL at the end of the task.
+- When answering questions, respond with high-confidence answers only: verify in code; do not guess.
+- Never update the Carbon dependency.
+- Any dependency with `pnpm.patchedDependencies` must use an exact version (no `^`/`~`).
+- Patching dependencies (pnpm patches, overrides, or vendored changes) requires explicit approval; do not do this by default.
+- CLI progress: use `src/cli/progress.ts` (`osc-progress` + `@clack/prompts` spinner); don’t hand-roll spinners/bars.
+- Status output: keep tables + ANSI-safe wrapping (`src/terminal/table.ts`); `status --all` = read-only/pasteable, `status --deep` = probes.
+- Gateway currently runs only as the menubar app; there is no separate LaunchAgent/helper label installed. Restart via the OpenClaw Mac app or `scripts/restart-mac.sh`; to verify/kill use `launchctl print gui/$UID | grep openclaw` rather than assuming a fixed label. **When debugging on macOS, start/stop the gateway via the app, not ad-hoc tmux sessions; kill any temporary tunnels before handoff.**
+- macOS logs: use `./scripts/clawlog.sh` to query unified logs for the OpenClaw subsystem; it supports follow/tail/category filters and expects passwordless sudo for `/usr/bin/log`.
+- If shared guardrails are available locally, review them; otherwise follow this repo's guidance.
+- SwiftUI state management (iOS/macOS): prefer the `Observation` framework (`@Observable`, `@Bindable`) over `ObservableObject`/`@StateObject`; don’t introduce new `ObservableObject` unless required for compatibility, and migrate existing usages when touching related code.
+- Connection providers: when adding a new connection, update every UI surface and docs (macOS app, web UI, mobile if applicable, onboarding/overview docs) and add matching status + configuration forms so provider lists and settings stay in sync.
+- Version locations: `package.json` (CLI), `apps/android/app/build.gradle.kts` (versionName/versionCode), `apps/ios/Sources/Info.plist` + `apps/ios/Tests/Info.plist` (CFBundleShortVersionString/CFBundleVersion), `apps/macos/Sources/OpenClaw/Resources/Info.plist` (CFBundleShortVersionString/CFBundleVersion), `docs/install/updating.md` (pinned npm version), `docs/platforms/mac/release.md` (APP_VERSION/APP_BUILD examples), Peekaboo Xcode projects/Info.plists (MARKETING_VERSION/CURRENT_PROJECT_VERSION).
+- **Restart apps:** “restart iOS/Android apps” means rebuild (recompile/install) and relaunch, not just kill/launch.
+- **Device checks:** before testing, verify connected real devices (iOS/Android) before reaching for simulators/emulators.
+- iOS Team ID lookup: `security find-identity -p codesigning -v` → use Apple Development (…) TEAMID. Fallback: `defaults read com.apple.dt.Xcode IDEProvisioningTeamIdentifiers`.
+- A2UI bundle hash: `src/canvas-host/a2ui/.bundle.hash` is auto-generated; ignore unexpected changes, and only regenerate via `pnpm canvas:a2ui:bundle` (or `scripts/bundle-a2ui.sh`) when needed. Commit the hash as a separate commit.
+- Release signing/notary keys are managed outside the repo; follow internal release docs.
+- Notary auth env vars (`APP_STORE_CONNECT_ISSUER_ID`, `APP_STORE_CONNECT_KEY_ID`, `APP_STORE_CONNECT_API_KEY_P8`) are expected in your environment (per internal release docs).
+- **Multi-agent safety:** do **not** create/apply/drop `git stash` entries unless explicitly requested (this includes `git pull --rebase --autostash`). Assume other agents may be working; keep unrelated WIP untouched and avoid cross-cutting state changes.
+- **Multi-agent safety:** when the user says "push", you may `git pull --rebase` to integrate latest changes (never discard other agents' work). When the user says "commit", scope to your changes only. When the user says "commit all", commit everything in grouped chunks.
+- **Multi-agent safety:** do **not** create/remove/modify `git worktree` checkouts (or edit `.worktrees/*`) unless explicitly requested.
+- **Multi-agent safety:** do **not** switch branches / check out a different branch unless explicitly requested.
+- **Multi-agent safety:** running multiple agents is OK as long as each agent has its own session.
+- **Multi-agent safety:** when you see unrecognized files, keep going; focus on your changes and commit only those.
+- Lint/format churn:
+  - If staged+unstaged diffs are formatting-only, auto-resolve without asking.
+  - If commit/push already requested, auto-stage and include formatting-only follow-ups in the same commit (or a tiny follow-up commit if needed), no extra confirmation.
+  - Only ask when changes are semantic (logic/data/behavior).
+- Lobster seam: use the shared CLI palette in `src/terminal/palette.ts` (no hardcoded colors); apply palette to onboarding/config prompts and other TTY UI output as needed.
+- **Multi-agent safety:** focus reports on your edits; avoid guard-rail disclaimers unless truly blocked; when multiple agents touch the same file, continue if safe; end with a brief “other files present” note only if relevant.
+- Bug investigations: read source code of relevant npm dependencies and all related local code before concluding; aim for high-confidence root cause.
+- Code style: add brief comments for tricky logic; keep files under ~500 LOC when feasible (split/refactor as needed).
+- Tool schema guardrails (google-antigravity): avoid `Type.Union` in tool input schemas; no `anyOf`/`oneOf`/`allOf`. Use `stringEnum`/`optionalStringEnum` (Type.Unsafe enum) for string lists, and `Type.Optional(...)` instead of `... | null`. Keep top-level tool schema as `type: "object"` with `properties`.
+- Tool schema guardrails: avoid raw `format` property names in tool schemas; some validators treat `format` as a reserved keyword and reject the schema.
+- When asked to open a “session” file, open the Pi session logs under `~/.openclaw/agents/<agentId>/sessions/*.jsonl` (use the `agent=<id>` value in the Runtime line of the system prompt; newest unless a specific ID is given), not the default `sessions.json`. If logs are needed from another machine, SSH via Tailscale and read the same path there.
+- Do not rebuild the macOS app over SSH; rebuilds must be run directly on the Mac.
+- Never send streaming/partial replies to external messaging surfaces (WhatsApp, Telegram); only final replies should be delivered there. Streaming/tool events may still go to internal UIs/control channel.
+- Voice wake forwarding tips:
+  - Command template should stay `openclaw-mac agent --message "${text}" --thinking low`; `VoiceWakeForwarder` already shell-escapes `${text}`. Don’t add extra quotes.
+  - launchd PATH is minimal; ensure the app’s launch agent PATH includes standard system paths plus your pnpm bin (typically `$HOME/Library/pnpm`) so `pnpm`/`openclaw` binaries resolve when invoked via `openclaw-mac`.
+- For manual `openclaw message send` messages that include `!`, use the heredoc pattern noted below to avoid the Bash tool’s escaping.
+- Release guardrails: do not change version numbers without operator’s explicit consent; always ask permission before running any npm publish/release step.
+
+## NPM + 1Password (publish/verify)
+
+- Use the 1password skill; all `op` commands must run inside a fresh tmux session.
+- Sign in: `eval "$(op signin --account my.1password.com)"` (app unlocked + integration on).
+- OTP: `op read 'op://Private/Npmjs/one-time password?attribute=otp'`.
+- Publish: `npm publish --access public --otp="<otp>"` (run from the package dir).
+- Verify without local npmrc side effects: `npm view <pkg> version --userconfig "$(mktemp)"`.
+- Kill the tmux session after publish.
