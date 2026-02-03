@@ -23,6 +23,7 @@ export const XHS_SELECTORS = {
     uploadInput: ".upload-input",
     uploadArea: ".upload-wrapper",
     imagePreview: ".img-preview-area .pr",
+    videoPreview: ".video-preview-area, .upload-video-preview",
 
     // Title input - 实际使用的选择器
     titleInput: "div.d-input input",

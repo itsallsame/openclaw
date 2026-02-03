@@ -109,7 +109,7 @@ export interface PlatformAdapter {
   /**
    * Upload media files
    */
-  uploadMedia(ctx: BrowserContext, media: MediaItem[]): Promise<void>;
+  uploadMedia(ctx: BrowserContext, media: MediaItem[], contentType?: string): Promise<void>;
 
   /**
    * Submit the publish form

@@ -48,9 +48,10 @@ export async function checkLogin(ctx: BrowserContext): Promise<LoginStatus> {
 }
 
 /**
- * Navigate to publish page and select image upload tab
+ * Navigate to publish page and select upload tab
+ * @param contentType - 'image' for 图文, 'video' for 视频
  */
-export async function navigateToPublish(ctx: BrowserContext): Promise<void> {
+export async function navigateToPublish(ctx: BrowserContext, contentType: 'image' | 'video' = 'image'): Promise<void> {
   const log = (message: string) => {
     console.log(`[xhs] ${message}`);
   };
@@ -105,9 +106,11 @@ export async function navigateToPublish(ctx: BrowserContext): Promise<void> {
     throw new Error("Not logged in - please login to Xiaohongshu first");
   }
 
+  const tabText = contentType === 'video' ? XHS_SELECTORS.publish.uploadVideoTab : XHS_SELECTORS.publish.uploadImageTab;
+
   const clickedUploadTab = await ctx.evaluate<boolean>(`
     (() => {
-      const text = ${JSON.stringify(XHS_SELECTORS.publish.uploadImageTab)};
+      const text = ${JSON.stringify(tabText)};
       const elements = Array.from(document.querySelectorAll('*'));
       for (const el of elements) {
         if ((el.textContent || '').trim() === text) {
@@ -123,7 +126,7 @@ export async function navigateToPublish(ctx: BrowserContext): Promise<void> {
 
   if (!clickedUploadTab) {
     await dumpClickableElements("upload-tab-missing");
-    throw new Error(`Could not find exact tab text: ${XHS_SELECTORS.publish.uploadImageTab}`);
+    throw new Error(`Could not find exact tab text: ${tabText}`);
   }
 
   await ctx.sleep(2000);
@@ -140,9 +143,13 @@ export async function navigateToPublish(ctx: BrowserContext): Promise<void> {
 }
 
 /**
- * Upload images to the publish form (file-chooser hook with DataTransfer fallback)
+ * Upload images or video to the publish form (file-chooser hook with DataTransfer fallback)
  */
-export async function uploadImages(ctx: BrowserContext, media: Array<MediaItem | string>): Promise<void> {
+export async function uploadImages(
+  ctx: BrowserContext,
+  media: Array<MediaItem | string>,
+  contentType: 'image' | 'video' = 'image'
+): Promise<void> {
   if (!media || media.length === 0) {
     throw new Error("At least one image is required");
   }
@@ -385,6 +392,20 @@ export async function uploadImages(ctx: BrowserContext, media: Array<MediaItem |
 
   await debugPreviewElements("after-upload");
 
+  // For video uploads, wait for video processing instead of checking preview count
+  if (contentType === 'video') {
+    log("waiting for video processing...");
+    // Wait for title input to appear (indicates video is processed)
+    try {
+      await waitForSelector(ctx, XHS_SELECTORS.publish.titleInput, { timeout: 120000 });
+      log("video processing complete - title input appeared");
+      return;
+    } catch (error) {
+      throw new Error("Video processing timeout - title input did not appear");
+    }
+  }
+
+  // For images, verify preview count
   const previewTimeout = 60000 + media.length * 30000;
   const verifyStart = Date.now();
   let finalCount = 0;

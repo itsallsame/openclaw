@@ -14,22 +14,14 @@
 
 - ✓ 视频智能剪辑功能 (video-edit skill) — existing
 - ✓ 小红书内容发布功能 (content-publisher extension) — existing
-- ✓ Doubao ASR 视频转录 — existing
-- ✓ LLM 精彩片段选择 — existing
-- ✓ 字幕自动生成和烧录 — existing
-- ✓ 浏览器自动化发布 — existing
 
 ### Active
 
-- [ ] 创建新的 video-publish skill 整合剪辑和发布流程
-- [ ] 实现对话式指令解析（提取剪辑要求、目标平台、输出模式）
-- [ ] 实现基于视频内容的智能标题生成
-- [ ] 实现基于视频内容的智能描述文案生成
-- [ ] 实现基于视频内容的智能标签生成
-- [ ] 添加抖音平台支持到 content-publisher
-- [ ] 支持多个独立片段的批量发布
-- [ ] 支持单个合并视频的发布
-- [ ] 实现发布结果的统一返回和展示
+- [x] 创建新的 video-publish skill — completed 2026-02-02
+  - ✓ 调用 video-edit 进行视频剪辑
+  - ✓ 使用 LLM 生成标题、描述、标签
+  - ✓ 调用 content-publisher 发布到指定平台
+  - ✓ 返回发布结果
 
 ### Out of Scope
 

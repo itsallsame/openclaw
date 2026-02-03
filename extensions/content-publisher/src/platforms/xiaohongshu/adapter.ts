@@ -11,7 +11,7 @@ import type {
 import { XHS_URLS, XHS_LIMITS } from "./selectors.js";
 import {
   checkLogin,
-  navigateToPublish,
+  navigateToPublish as navigateToPublishWorkflow,
   uploadImages,
   fillTitle,
   fillContent,
@@ -51,8 +51,10 @@ export const xiaohongshuAdapter: PlatformAdapter = {
     return checkLogin(ctx);
   },
 
-  async navigateToPublish(ctx: BrowserContext, _contentType?: string): Promise<void> {
-    await navigateToPublish(ctx);
+  async navigateToPublish(ctx: BrowserContext, contentType?: string): Promise<void> {
+    // Determine if this is a video or image post
+    const type = contentType === 'video' ? 'video' : 'image';
+    await navigateToPublishWorkflow(ctx, type);
   },
 
   async fillContent(ctx: BrowserContext, content: PublishContent): Promise<void> {
@@ -72,8 +74,9 @@ export const xiaohongshuAdapter: PlatformAdapter = {
     }
   },
 
-  async uploadMedia(ctx: BrowserContext, media: MediaItem[]): Promise<void> {
-    await uploadImages(ctx, media);
+  async uploadMedia(ctx: BrowserContext, media: MediaItem[], contentType?: string): Promise<void> {
+    const type = contentType === 'video' ? 'video' : 'image';
+    await uploadImages(ctx, media, type);
   },
 
   async submit(ctx: BrowserContext, options: PublishOptions): Promise<PublishResult> {

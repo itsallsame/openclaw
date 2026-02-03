@@ -138,6 +138,12 @@ Use platform_status first to check login status. Images are required for Xiaohon
           description: "Images to upload. Each item needs type (url/path/base64) and value",
         })
       ),
+      video: Type.Optional(
+        MediaItemSchema,
+        {
+          description: "Video to upload. Needs type (url/path) and value (file path or URL)",
+        }
+      ),
       tags: Type.Optional(
         Type.Array(Type.String(), {
           description: "Tags/topics to add (without # prefix)",
@@ -194,6 +200,8 @@ Use platform_status first to check login status. Images are required for Xiaohon
 
       // Prepare media
       const rawImages = params.images as Array<{ type: string; value: string; filename?: string }> | undefined;
+      const rawVideo = params.video as { type: string; value: string; filename?: string } | undefined;
+
       if (rawImages && rawImages.length > 0) {
         try {
           content.media = await prepareMedia(rawImages);
@@ -205,6 +213,24 @@ Use platform_status first to check login status. Images are required for Xiaohon
                 text: JSON.stringify({
                   success: false,
                   error: `Failed to prepare media: ${error instanceof Error ? error.message : String(error)}`,
+                }),
+              },
+            ],
+            isError: true,
+            details: {},
+          };
+        }
+      } else if (rawVideo) {
+        try {
+          content.media = await prepareMedia([rawVideo]);
+        } catch (error) {
+          return {
+            content: [
+              {
+                type: "text" as const,
+                text: JSON.stringify({
+                  success: false,
+                  error: `Failed to prepare video: ${error instanceof Error ? error.message : String(error)}`,
                 }),
               },
             ],
@@ -274,11 +300,13 @@ Use platform_status first to check login status. Images are required for Xiaohon
         }
 
         // Navigate to publish page
-        await adapter.navigateToPublish(ctx);
+        // Determine content type based on media
+        const contentType = rawVideo ? 'video' : 'image';
+        await adapter.navigateToPublish(ctx, contentType);
 
         // Upload media first (for platforms that require it)
         if (content.media && content.media.length > 0) {
-          await adapter.uploadMedia(ctx, content.media);
+          await adapter.uploadMedia(ctx, content.media, contentType);
         }
 
         // Fill content
